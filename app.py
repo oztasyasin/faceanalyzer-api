@@ -29,6 +29,34 @@ def analyze():
         print(str(e))
         return jsonify({"error": "Face could not be detected. Please try a different image."}), 400
 
+@app.route('/analyzeWithAll', methods=['POST'])
+def analyzeWithAll():
+    try:
+        data = request.json['data']
+        result = save_image(data)
+        if result:
+            backends = [
+                'opencv', 
+                'ssd', 
+                'mtcnn', 
+                'fastmtcnn',
+                'retinaface', 
+                'mediapipe',
+                'yolov8',
+                'yunet',
+                'centerface',
+            ]
+            results = {}
+            for backend in backends:
+                demography = DeepFace.analyze("image.jpg",detector_backend=backend)
+                results[backend] = demography
+            
+            return jsonify(results)
+        else:
+            return jsonify({"error": "Something went wrong."}), 400
+    except Exception as e:
+        print(str(e))
+        return jsonify({"error": "Face could not be detected. Please try a different image."}), 400
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=5001)
